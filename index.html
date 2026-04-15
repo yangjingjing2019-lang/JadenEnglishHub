@@ -6,7 +6,7 @@
     <title>Jaden 加油站 - English Hub</title>
     <style>
         :root {
-            --primary-color: #4a90e2; /* 星空藍 */
+            --primary-color: #4a90e2; 
             --bg-color: #f0f4f8;
             --card-bg: #ffffff;
             --text-color: #34495e;
@@ -15,6 +15,8 @@
             --font-main: "Yuanti SC", "STYuanti-SC-Regular", "微軟正黑體", sans-serif;
             --accent-new: #ff4757;
             --accent-ready: #27ae60;
+            --tense-color: #9b59b6; /* 翻卡紫色 */
+            --quiz-color: #e67e22;  /* 練習橙色 */
         }
 
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -53,11 +55,14 @@
         .section-title::before {
             content: ""; display: inline-block;
             width: 8px; height: 24px;
-            background: var(--primary-color); border-radius: 10px;
+            border-radius: 10px;
         }
 
+        /* 欄目標籤顏色 */
         .term-4a::before { background: #3498db; }
         .term-4b::before { background: #2ecc71; }
+        .tense-section::before { background: var(--tense-color); }
+        .quiz-section::before { background: var(--quiz-color); }
 
         .game-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;
@@ -85,6 +90,8 @@
 
         .status-new { background: var(--accent-new) !important; color: white !important; }
         .status-online { background: #e3f2fd !important; color: #1976d2 !important; }
+        .status-tense { background: #f3e5f5 !important; color: #8e24aa !important; }
+        .status-quiz { background: #fff3e0 !important; color: #ef6c00 !important; }
 
         .game-card.locked { opacity: 0.6; cursor: default; filter: grayscale(0.8); }
 
@@ -111,6 +118,12 @@
     <div class="section-title term-4a">Primary 4A - Vocabulary & Spelling</div>
     <div class="game-grid" id="grid-4a"></div>
 
+    <div class="section-title tense-section">P4A Verb Tense - Flashcards</div>
+    <div class="game-grid" id="grid-tense-flash"></div>
+
+    <div class="section-title quiz-section">P4A Verb Tense - Quiz Challenge</div>
+    <div class="game-grid" id="grid-tense-quiz"></div>
+
     <div class="section-title term-4b">Primary 4B - Vocabulary & Spelling</div>
     <div class="game-grid" id="grid-4b"></div>
 
@@ -121,17 +134,31 @@
 </div>
 
 <script>
-    // 4A 數據：將您的網址填入 Unit 5
+    // 1. 4A 詞語數據
     const term4AData = [
         { name: "Unit 1: Leisure activities", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit1/", icon: "🎡", status: "NEW" },
-        { name: "Unit 2: Friendly and unfriendly actions", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit2/", icon: "🏫", status: "NEW" },
-        { name: "Unit 3: frscribing people", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit3/", icon: "🍎", status: "NEW" },
+        { name: "Unit 2: Friendly actions", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit2/", icon: "🏫", status: "NEW" },
+        { name: "Unit 3: Describing people", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit3/", icon: "🍎", status: "NEW" },
         { name: "Unit 4: Types of stories", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit4/", icon: "🎮", status: "NEW" },
-        { name: "Unit 5: festival activities", url: "https://yangjingjing2019-lang.github.io/Jaden-4a-flashcard/", icon: "🃏", status: "NEW" },
-        { name: "Unit 6: Things at the funfair", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit6/", icon: "🎡", status: "NEW" }
+        { name: "Unit 5: Festival activities", url: "https://yangjingjing2019-lang.github.io/Jaden-4a-flashcard/", icon: "🃏", status: "NEW" },
+        { name: "Unit 6: Funfair things", url: "https://yangjingjing2019-lang.github.io/Jaden4Aflashcardunit6/", icon: "🎡", status: "NEW" }
     ];
 
-    // 4B 數據
+    // 2. Tense 翻卡數據
+    const tenseFlashData = [
+        { name: "Verb Card: Page 1 (1-33)", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-flashcard1/", icon: "💎", status: "TENSE" },
+        { name: "Verb Card: Page 2 (34-77)", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-flashcard2/", icon: "💎", status: "TENSE" },
+        { name: "Verb Card: Page 3 (78-118)", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-flashcard3/", icon: "💎", status: "TENSE" }
+    ];
+
+    // 3. Tense 練習數據 (修改了圖標為更具挑戰性的火箭、靶心等)
+    const tenseQuizData = [
+        { name: "Tense Quiz: Level 1", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-exercise1/", icon: "🚀", status: "QUIZ" },
+        { name: "Tense Quiz: Level 2", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-exercise2/", icon: "🎯", status: "QUIZ" },
+        { name: "Tense Quiz: Level 3", url: "https://yangjingjing2019-lang.github.io/Jaden-4A-tense-exercise3/", icon: "🔥", status: "QUIZ" }
+    ];
+
+    // 4. 4B 數據
     const term4BData = [
         { name: "Unit 1: Nature", url: "#", icon: "🌿", status: "敬請期待" },
         { name: "Unit 2: Shopping", url: "#", icon: "🛍️", status: "敬請期待" },
@@ -143,6 +170,8 @@
 
     window.onload = () => {
         renderGrid('grid-4a', term4AData);
+        renderGrid('grid-tense-flash', tenseFlashData);
+        renderGrid('grid-tense-quiz', tenseQuizData);
         renderGrid('grid-4b', term4BData);
     };
 
@@ -151,12 +180,17 @@
         container.innerHTML = data.map(item => {
             const isLocked = item.status === '敬請期待';
             const isNew = item.status === 'NEW';
-            const statusClass = isNew ? 'status-new' : (isLocked ? '' : 'status-online');
             
+            let statusClass = '';
+            if (isNew) statusClass = 'status-new';
+            else if (item.status === 'TENSE') statusClass = 'status-tense';
+            else if (item.status === 'QUIZ') statusClass = 'status-quiz';
+            else if (!isLocked) statusClass = 'status-online';
+
             return `
                 <a href="${item.url !== '#' ? item.url : 'javascript:void(0)'}" 
                    class="game-card ${isLocked ? 'locked' : ''}"
-                   ${item.url !== '#' ? `target="_blank"` : 'onclick="alert(\'能源補充中，敬請期待！\')"'}>
+                   ${item.url !== '#' ? `target="_blank"` : 'onclick="alert(\'網頁準備中，請稍後再試！\')"'}>
                     <div class="game-icon">${item.icon}</div>
                     <div class="game-name">${item.name}</div>
                     <div class="game-status ${statusClass}">${item.status}</div>
